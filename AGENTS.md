@@ -65,9 +65,9 @@ Secrets and connection details belong in `.env` or `~/.dbt/profiles.yml`. Never 
 
 ```bash
 # Data retrieval
-uv run python python-scripts/get_data.py 2020              # v1: basic downloader
-uv run python python-scripts/get_data_v2.py 2020             # v2: wget-style progress + summary
-uv run python python-scripts/get_data_v2.py 2020 --dry-run
+uv run python python-scripts/get_data.py 2020
+uv run python python-scripts/get_data.py 2020 --dry-run
+uv run python python-scripts/get_data.py 2020 --force
 
 # dbt — run from dbt/
 cd dbt

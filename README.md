@@ -55,7 +55,8 @@ uv sync
 
 # Download all TLC parquet files for a year into data/<year>/
 uv run python python-scripts/get_data.py 2020
-uv run python python-scripts/get_data.py 2020 --dry-run   # preview URLs only
+uv run python python-scripts/get_data.py 2020 --dry-run
+uv run python python-scripts/get_data.py 2020 --force
 ```
 
 Configure dbt profiles locally in `~/.dbt/profiles.yml` (not checked into this repo). Use a `dev` target for DuckDB and a `prod` (or `snowflake`) target for Snowflake when ready.
