@@ -1,15 +1,4 @@
-
-__pycache__/
-.venv/
-.env
 .DS_Store
-.vscode/
-
-# accidental data generation
-*.parquet
-
-# dbt
-target/
-dbt_packages/
-dbt_internal_packages/
-logs/
+.venv
+.env
+*__pycache__

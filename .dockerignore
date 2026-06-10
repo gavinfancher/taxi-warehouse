@@ -1,9 +1,0 @@
-.env
-.venv/
-.git/
-__pycache__/
-*.parquet
-dbt/
-.DS_Store
-.claude/
-*.pyc
