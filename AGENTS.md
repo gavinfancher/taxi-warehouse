@@ -13,7 +13,8 @@ NYC TLC trip data warehouse focused on **analytics engineering with dbt**. Raw t
 ## Repository layout
 
 ```
-python-scripts/     # Data retrieval and loading from the TLC website (planned)
+data/
+  get_data.py       # Download TLC parquet files into data/<year>/
 dbt/
   models/           # staging (stg_*), intermediate (int_*), marts (planned)
   seeds/            # Lookup CSVs (vendor, rate_code, payment_type, hvfhs_license, etc.)
@@ -65,9 +66,9 @@ Secrets and connection details belong in `.env` or `~/.dbt/profiles.yml`. Never 
 
 ```bash
 # Data retrieval
-uv run python python-scripts/get_data.py 2020
-uv run python python-scripts/get_data.py 2020 --dry-run
-uv run python python-scripts/get_data.py 2020 --force
+uv run python data/get_data.py 2020
+uv run python data/get_data.py 2020 --dry-run
+uv run python data/get_data.py 2020 --force
 
 # dbt — run from dbt/
 cd dbt
@@ -84,7 +85,7 @@ uv run dbt run --target prod
 ## Architecture
 
 ```
-TLC parquet/CSV  →  python-scripts/  →  local files / DuckDB raw layer
+TLC parquet/CSV  →  data/get_data.py  →  data/<year>/*.parquet  →  DuckDB raw layer
                                                     ↓
                                          dbt staging models (views)
                                                     ↓
@@ -97,7 +98,7 @@ Ingestion details (download cadence, file layout, raw table naming) are still be
 
 ## Coding conventions
 
-### Python (`python-scripts/`)
+### Python (`data/get_data.py`)
 
 - Python 3.12+, managed with uv (`pyproject.toml` + `uv.lock`).
 - Use single quotes for strings.
@@ -137,7 +138,7 @@ Ingestion details (download cadence, file layout, raw table naming) are still be
 
 - `uv.lock` — only update via `uv lock` / `uv sync` when dependencies change.
 - `target/`, `dbt_packages/`, `logs/` — dbt generated output.
-- `*.parquet`, `*.duckdb`, large CSV extracts — downloaded/generated data (gitignored).
+- `data/<year>/`, `*.parquet`, `*.duckdb` — downloaded/generated data (gitignored; `data/get_data.py` is tracked).
 - `.env` — local secrets (gitignored).
 
 ## Verification
@@ -146,7 +147,7 @@ After making changes, run the relevant checks:
 
 | Change type | Verify with |
 |---|---|
-| Python scripts | `uv run python python-scripts/<script>.py` |
+| Data download | `uv run python data/get_data.py <year>` |
 | dbt models (local) | `cd dbt && uv run dbt compile && uv run dbt run --select <model> && uv run dbt test --select <model>` |
 | dbt models (Snowflake) | `cd dbt && uv run dbt run --target prod --select <model>` |
 | Seeds | `cd dbt && uv run dbt seed && uv run dbt test` |
@@ -156,7 +157,7 @@ If Snowflake credentials are unavailable, at minimum ensure SQL compiles on Duck
 
 ## Adding new work
 
-- **New raw dataset from TLC:** extend ingestion in `python-scripts/`, land raw data, add a source in `_sources.yml`, then create a `stg_*` model.
+- **New raw dataset from TLC:** extend `data/get_data.py`, land raw data under `data/<year>/`, add a source in `_sources.yml`, then create a `stg_*` model.
 - **New dbt layer:** add a subdirectory under `dbt/models/`, configure materialization in `dbt_project.yml`, follow naming conventions above.
 - **New lookup data:** add a CSV to `dbt/seeds/` and reference it from staging or mart models.
 - **Snowflake-only optimization:** use macros so the DuckDB `dev` target stays runnable for local development.

@@ -36,7 +36,8 @@ TLC website (parquet/CSV)
 ## Project layout
 
 ```
-python-scripts/     # Data retrieval and loading (planned)
+data/
+  get_data.py       # Download TLC parquet files into data/<year>/
 dbt/
   models/           # Staging, intermediate, and mart models (planned)
   seeds/            # Lookup CSVs (vendor, rate codes, payment types, etc.)
@@ -54,9 +55,9 @@ This repo was recently restarted around the DuckDB → Snowflake workflow. Tooli
 uv sync
 
 # Download all TLC parquet files for a year into data/<year>/
-uv run python python-scripts/get_data.py 2020
-uv run python python-scripts/get_data.py 2020 --dry-run
-uv run python python-scripts/get_data.py 2020 --force
+uv run python data/get_data.py 2020
+uv run python data/get_data.py 2020 --dry-run
+uv run python data/get_data.py 2020 --force
 ```
 
 Configure dbt profiles locally in `~/.dbt/profiles.yml` (not checked into this repo). Use a `dev` target for DuckDB and a `prod` (or `snowflake`) target for Snowflake when ready.
