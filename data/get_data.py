@@ -1,6 +1,5 @@
 '''Download NYC TLC trip record parquet files for a given year.'''
 
-import argparse
 import re
 import sys
 import time
@@ -22,6 +21,7 @@ SIZE_WIDTH = 7
 TIME_WIDTH = 7
 RATE_WIDTH = 10
 TERMINAL_WIDTH = 132
+TARGET_YEAR = 2025
 
 
 def repo_root() -> Path:
@@ -157,55 +157,34 @@ def download_file(
     return downloaded
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description='Download NYC TLC trip record parquet files for a given year.'
-    )
-    parser.add_argument('year', type=int, help='Four-digit year to download (e.g. 2020)')
-    parser.add_argument(
-        '--output-dir',
-        type=Path,
-        default=None,
-        help='Directory for downloads (default: data/<year> under repo root)',
-    )
-    parser.add_argument(
-        '--force',
-        action='store_true',
-        help='Re-download files even if they already exist locally',
-    )
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='List matching parquet URLs without downloading',
-    )
-    return parser.parse_args()
-
-
 def main() -> int:
-    args = parse_args()
-    if args.year < 2009 or args.year > 2100:
-        print(f'error: invalid year {args.year}', file=sys.stderr)
+    year = TARGET_YEAR
+    force = False
+    dry_run = False
+    output_dir = repo_root() / 'data' / str(year)
+
+    if year < 2009 or year > 2100:
+        print(f'error: invalid year {year}', file=sys.stderr)
         return 1
 
-    output_dir = args.output_dir or repo_root() / 'data' / str(args.year)
     headers = {'User-Agent': BROWSER_USER_AGENT}
     timeout = httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=30.0)
 
     with httpx.Client(headers=headers, timeout=timeout) as client:
         print(f'scanning {TLC_PAGE_URL}')
         parquet_urls = fetch_parquet_urls(client)
-        year_urls = urls_for_year(parquet_urls, args.year)
+        year_urls = urls_for_year(parquet_urls, year)
 
         if not year_urls:
-            print(f'error: no parquet files found for {args.year}', file=sys.stderr)
+            print(f'error: no parquet files found for {year}', file=sys.stderr)
             return 1
 
         filenames = [url.split('/')[-1] for url in year_urls]
         layout = DownloadLayout(filenames)
         total_files = len(year_urls)
-        print(f'found {total_files} file(s) for {args.year} -> {output_dir}')
+        print(f'found {total_files} file(s) for {year} -> {output_dir}')
 
-        if args.dry_run:
+        if dry_run:
             for index, filename in enumerate(filenames, start=1):
                 print(f'  {layout.label(index, filename)}')
             return 0
@@ -221,7 +200,7 @@ def main() -> int:
             filename = url.split('/')[-1]
             dest = output_dir / filename
 
-            if dest.exists() and not args.force:
+            if dest.exists() and not force:
                 skipped_count += 1
                 skipped_files.append((index, filename))
                 continue
@@ -241,7 +220,7 @@ def main() -> int:
         elapsed = time.perf_counter() - started
         print()
         print('summary')
-        print(f'  year:       {args.year}')
+        print(f'  year:       {year}')
         print(f'  output:     {output_dir}')
         print(f'  downloaded: {downloaded_count}')
         print(f'  skipped:    {skipped_count}')

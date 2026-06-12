@@ -8,7 +8,7 @@ CATEGORIES = ['yellow', 'green', 'fhv', 'fhvhv']
 con = duckdb.connect(DB)
 
 for category in CATEGORIES:
-    glob = f'{DATA}/*/{category}_tripdata_*.parquet'
+    glob = f'{DATA}/2025/{category}_tripdata_*.parquet'
     table = f'{category}_trips'
 
     con.execute(f"""
