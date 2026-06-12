@@ -5,8 +5,8 @@
 .vscode
 
 # Downloaded trip data (keep data/*.py scripts tracked)
-data/**/*
-!data/*.py
+data/parquet/*
+data/db/*
 *.parquet
 *.duckdb
 .ipynb_checkpoints/
