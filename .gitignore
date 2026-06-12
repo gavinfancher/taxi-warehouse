@@ -2,8 +2,11 @@
 .venv
 .env
 *__pycache__
+.vscode
 
-# Downloaded trip data (keep data/get_data.py tracked)
+# Downloaded trip data (keep data/*.py scripts tracked)
 data/**/*
-!data/get_data.py
+!data/*.py
 *.parquet
+*.duckdb
+.ipynb_checkpoints/

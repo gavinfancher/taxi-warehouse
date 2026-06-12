@@ -15,6 +15,8 @@ NYC TLC trip data warehouse focused on **analytics engineering with dbt**. Raw t
 ```
 data/
   get_data.py       # Download TLC parquet files into data/<year>/
+notebooks/
+  duckdb_exploration.ipynb   # Local DuckDB exploration (VS Code + uv kernel)
 dbt/
   models/           # staging (stg_*), intermediate (int_*), marts (planned)
   seeds/            # Lookup CSVs (vendor, rate_code, payment_type, hvfhs_license, etc.)
@@ -56,7 +58,7 @@ nyc_taxi_warehouse:
 ## Setup
 
 ```bash
-# Install dependencies (once pyproject.toml lists them)
+# Install dependencies (notebook group included by default)
 uv sync
 ```
 

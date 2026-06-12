@@ -51,7 +51,7 @@ This repo was recently restarted around the DuckDB → Snowflake workflow. Tooli
 **Prerequisites:** Python 3.12+, [uv](https://docs.astral.sh/uv/), dbt with DuckDB and Snowflake adapters.
 
 ```bash
-# Install Python dependencies
+# Install Python dependencies (includes notebook group: DuckDB, ipykernel, pandas)
 uv sync
 
 # Download all TLC parquet files for a year into data/<year>/
@@ -59,6 +59,14 @@ uv run python data/get_data.py 2020
 uv run python data/get_data.py 2020 --dry-run
 uv run python data/get_data.py 2020 --force
 ```
+
+### DuckDB notebook (VS Code)
+
+1. Run `uv sync`
+2. Open `notebooks/duckdb_exploration.ipynb` in VS Code
+3. Select the kernel: **Python 3.x (.venv)** — `.vscode/settings.json` points at the project venv
+
+Packages are managed in `pyproject.toml` under `[dependency-groups] notebook`.
 
 Configure dbt profiles locally in `~/.dbt/profiles.yml` (not checked into this repo). Use a `dev` target for DuckDB and a `prod` (or `snowflake`) target for Snowflake when ready.
 
