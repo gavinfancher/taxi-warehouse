@@ -8,8 +8,8 @@ DATA = 'data/parquet'
 TABLES = {
     'yellow': 'yellow_trips',
     'green': 'green_trips',
-    'fhv': 'fhv_trips',
-    'fhvhv': 'fhvhv_trips',
+    'fhv': 'for_hire_trips',
+    'fhvhv': 'rideshare_trips',
 }
 
 con = duckdb.connect(DB)
