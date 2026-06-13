@@ -1,10 +1,9 @@
-import duckdb
-from tqdm import tqdm
+import time
 
-DB = 'data/local.duckdb'
+import duckdb
+
+DB = 'data/db/local.duckdb'
 DATA = 'data/parquet'
-BAR_FORMAT = '{desc}{percentage:4.0f}%|{bar:28}|{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]'
-TERMINAL_WIDTH = 110
 
 TABLES = {
     'yellow': 'yellow_trips',
@@ -14,25 +13,22 @@ TABLES = {
 }
 
 con = duckdb.connect(DB)
+started = time.perf_counter()
+label_width = max(len(t) for t in TABLES.values())
 
-with tqdm(
-    total=len(TABLES),
-    desc='Loading parquet tables ',
-    unit='table',
-    bar_format=BAR_FORMAT,
-    dynamic_ncols=False,
-    ncols=TERMINAL_WIDTH,
-) as progress:
-    for category, table in TABLES.items():
-        path_glob = f'{DATA}/{category}_tripdata_2025-*.parquet'
-        con.execute(
-            f'create or replace table {table} as '
-            f"select * from read_parquet('{path_glob}', union_by_name=true)"
-        )
-        rows = con.execute(f'select count(*) from {table}').fetchone()[0]
-        progress.update(1)
-        progress.set_postfix_str(f'{table} {rows:,} rows', refresh=True)
-        tqdm.write(f'{table}: {rows:,} rows')
+print()
+for category, table in TABLES.items():
+    path_glob = f'{DATA}/{category}_tripdata_2025-*.parquet'
+    t0 = time.perf_counter()
+    con.execute(f"""
+        create or replace table {table} as
+        select *
+        from read_parquet('{path_glob}', union_by_name=true)
+    """)
+    elapsed = time.perf_counter() - t0
+    print(f'  {table:<{label_width}}  {elapsed:>5.1f}s')
 
 con.close()
-print(f'done -> {DB}')
+total = time.perf_counter() - started
+print()
+print(f'done -> {DB} ({total:.1f}s)')
