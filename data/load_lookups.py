@@ -9,8 +9,8 @@ DB = 'data/db/local.duckdb'
 SQL_DIR = Path('data/sql')
 
 SQL_FILES = [
-    'hvfhs_licenses.sql',
-    'trip_lookups.sql',
+    'hvfhs_lookup.sql',
+    'trip_lookup.sql',
     'zones_lookup.sql'
 ]
 
