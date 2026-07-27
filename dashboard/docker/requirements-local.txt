@@ -1,0 +1,7 @@
+# Extra Python drivers installed into the stock apache/superset image at
+# container startup by docker-bootstrap.sh (the documented Superset approach).
+#
+# duckdb MUST match the version that wrote ../data/db/local.duckdb (1.5.3).
+duckdb==1.5.3
+duckdb-engine>=0.13.0
+psycopg2-binary>=2.9

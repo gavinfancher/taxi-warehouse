@@ -1,0 +1,75 @@
+name: nyc-taxi-superset
+
+# Stock Superset image; the DuckDB driver is installed at startup from
+# docker/requirements-local.txt by Superset's docker-bootstrap.sh.
+x-superset-image: &superset-image apache/superset:${SUPERSET_VERSION:-6.0.0}
+
+# Shared mounts. requirements-local.txt must land at /app/docker/ so bootstrap
+# finds it. The DuckDB warehouse is mounted read-only.
+x-superset-volumes: &superset-volumes
+  - ./superset_config.py:/app/superset_config.py:ro
+  - ./docker-init.sh:/app/docker-init.sh:ro
+  - ./docker/requirements-local.txt:/app/docker/requirements-local.txt:ro
+  - ../data/db:/data/db:ro
+
+# Installing into the image venv requires root; matches Superset's own compose.
+x-superset-env: &superset-env
+  SUPERSET_CONFIG_PATH: /app/superset_config.py
+  DATABASE_DIALECT: postgresql
+
+services:
+  superset-db:
+    image: postgres:18.4
+    container_name: superset-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-superset}
+      POSTGRES_USER: ${POSTGRES_USER:-superset}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-superset}
+    volumes:
+      # Postgres 18+ expects the mount at /var/lib/postgresql (it stores data in
+      # a version-specific subdir for pg_upgrade compatibility).
+      - superset-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-superset}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot bootstrap: install drivers, migrate metadata DB, create admin.
+  superset-init:
+    image: *superset-image
+    container_name: superset-init
+    user: "root"
+    depends_on:
+      superset-db:
+        condition: service_healthy
+    env_file: .env
+    environment: *superset-env
+    volumes: *superset-volumes
+    entrypoint: ["/bin/bash", "/app/docker-init.sh"]
+    restart: "no"
+
+  superset:
+    image: *superset-image
+    container_name: superset
+    user: "root"
+    restart: unless-stopped
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    env_file: .env
+    environment: *superset-env
+    ports:
+      - "${SUPERSET_PORT:-8088}:8088"
+    volumes: *superset-volumes
+    # bootstrap installs requirements-local.txt, then launches gunicorn.
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  superset-db-data:

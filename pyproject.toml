@@ -1,20 +1,7 @@
 [project]
 name = "nyc-taxi-warehouse"
-version = "0.1.0"
-description = "NYC TLC trip data modeled with dbt on DuckDB locally and Snowflake at scale"
+version = "0.1.1"
+description = "NYC TLC trip data modeled with dbt on Clickhouse and Snowflake at scale"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "httpx>=0.28.0",
-    "tqdm>=4.67.0",
-]
-
-[dependency-groups]
-notebook = [
-    "duckdb>=1.2.0",
-    "ipykernel>=6.29.0",
-    "pandas>=2.2.0",
-]
-
-[tool.uv]
-default-groups = ["notebook"]
+dependencies = ["dbt-duckdb>=1.10.1", "httpx>=0.28.0", "tqdm>=4.67.0"]
