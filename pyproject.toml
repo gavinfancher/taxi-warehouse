@@ -4,4 +4,9 @@ version = "0.1.1"
 description = "NYC TLC trip data modeled with dbt on Clickhouse and Snowflake at scale"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["dbt-duckdb>=1.10.1", "httpx>=0.28.0", "tqdm>=4.67.0"]
+dependencies = [
+    "clickhouse-connect>=1.6.0",
+    "httpx>=0.28.0",
+    "pyarrow>=25.0.0",
+    "tqdm>=4.67.0",
+]
